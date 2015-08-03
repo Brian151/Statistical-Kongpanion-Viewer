@@ -1,0 +1,131 @@
+<html>
+	<head>
+		<style type="text/css">
+			#quicknav {
+			max-height: 400px;
+			overflow: scroll;
+			top: -371px;
+			left: 353px;
+			min-width: 200px;
+			max-width: 200px;
+			max-height: 365px;    
+		}
+
+			#pet {
+			border: 3px solid #b70000;
+			min-width: 350px;
+			max-width: 350px;
+			position: relative;
+			top: -371px;
+			left: 203px;
+		}
+		</style>
+		<script type="text/javascript" src="libs/jquery-2.1.4.min.js"></script>
+		<script type="text/javascript">
+			var nametag = document.getElementById("name");
+			var imggal = document.getElementById("pics");
+			var descrpanel = document.getElementById("desc");
+			var tagholder = document.getElementById("tags");
+			var statpanel = document.getElementById("stats");
+			var seedpanel = document.getElementById("seed");
+			var hppanel = document.getElementById("hp");
+			var atkpanel = document.getElementById("atk");
+			var spdpanel = document.getElementById("spd");
+
+			function embedimg2(url,url2){
+				imggal.innerHTML = "<img src=\"" + url + "\">";
+				imggal.innerHTML += "<img src=\"" + url2 + "\">";
+    
+			}
+
+			var jsonurl = "http://api.kongregate.com/api/kongpanions/index/";
+			var jsondata = null;
+
+			function createSeed (string) {
+				var out = "0";
+				for (var i=0; i<string.length; i++) {
+					out += string.charCodeAt(i);
+				}
+				return out;
+
+    
+			}
+
+			function trirandomizer (seed) {
+			var result = [];
+			var seed2 = parseInt(seed);
+				result[0] = Math.floor( ((seed2 + (5 * 7)) /3) % 5 + 1);
+				result[1] = Math.floor( ((seed2 + (22 * 77)) /5) % 5 + 1);
+				result[2] = Math.floor( ((seed2 + (31 * 97)) /4) % 10 + 1);  
+				return result;
+			}
+
+			function lookup(def){
+				var name = prompt("name?",def);
+				for (var i=0; i < jsondata.length; i++) {
+					if (jsondata[i].name == name) {
+         
+						//alert("found: " + name + " !");
+						//var jsondata = null; //wat
+						nametag.innerHTML = "NAME: " +  jsondata[i].name;
+						embedimg2(jsondata[i].normal_icon_url,jsondata[i].shiny_icon_url);
+						descrpanel.innerHTML = "DESCRIPTION: " + jsondata[i].description;
+						tagholder.innerHTML = "TAGS: " +  jsondata[i].tags.join(", ");
+						var seed=  createSeed(name);
+						seedpanel.innerHTML = "STAT SEED: " + seed;
+						var statprim = trirandomizer(seed);
+						statpanel. innerHTML = "STATS : (NORMAL | SHINY)";
+						var hp = statprim[0] * 10;
+						var hp2 = hp * 3;
+						var atk = statprim[1];
+						var atk2 = atk * 3;
+						var spd = statprim[2] * 10;
+						var spd2 = spd * 3;
+						hppanel.innerHTML = "HEALTH: " + hp + " | " + hp2;
+						atkpanel.innerHTML = "ATTACK: " + atk + " | " + atk2;
+						spdpanel.innerHTML = "SPEED: " + spd + " | " + spd2;
+            
+						break;
+					}
+				}
+			}
+			window.lookup = lookup;
+
+			$.ajax({
+				type: "GET",
+				url: jsonurl,
+				success: function(result) {
+					// result is the JSON loaded as an object
+					// as you can see:
+					//$("#json").text(result.kongpanions);
+					jsondata = result.kongpanions;
+        
+					// loading a url is asynchronous,
+					// so you can only play around with the loaded
+					// data after it has successfully loaded.
+					lookup("Puff Catty");
+        
+					$("#quicknav").html("");
+					for (var i in result.kongpanions) {
+						$("#quicknav").append("<br/><button onclick=\"window.lookup('" + result.kongpanions[i].name + "');\">" + "<img src='" + result.kongpanions[i].normal_icon_url_small + "'>"  + "</button>&nbsp;" +  result.kongpanions[i].name);
+					}
+				}
+			});
+		</script>
+	</head>
+	<body>
+		<div id="quicknav"></div>
+		<div id="pet">
+			<div id="name"></div>
+			<div id="pics"></div>
+			<div id="desc"></div>
+			<div id="tags"></div>
+			<div id="seed"></div>
+			<br/>
+			<div id="stats"></div>
+			<div id="hp"></div>
+			<div id="atk"></div>
+			<div id="spd"></div>
+		</div>
+	</body>
+</html>
