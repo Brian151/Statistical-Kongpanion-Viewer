@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<meta charset="utf-8"/>
 		<style type="text/css">
 			#quicknav {
 			max-height: 400px;
@@ -53,17 +54,15 @@
     
 			}
 
-			var jsonurl = "http://api.kongregate.com/api/kongpanions/index/";
+			var jsonurl = "http://api.kongregate.com/api/kongpanions/index.json";
 			var jsondata = null;
 
-			function createSeed (string) {
+			function createSeed (strsrc) {
 				var out = "0";
-				for (var i=0; i<string.length; i++) {
-					out += string.charCodeAt(i);
+				for (var i=0; i < strsrc.length; i++) {
+					out += strsrc.charCodeAt(i);
 				}
 				return out;
-
-    
 			}
 
 			function trirandomizer (seed) {
@@ -76,17 +75,16 @@
 			}
 
 			function lookup(def){
-				var name = prompt("name?",def);
-				for (var i=0; i < jsondata.length; i++) {
-					if (jsondata[i].name == name) {
+				var i = def;
          
 						//alert("found: " + name + " !");
 						//var jsondata = null; //wat
-						nametag.innerHTML = "NAME: " +  jsondata[i].name;
-						embedimg2(jsondata[i].normal_icon_url,jsondata[i].shiny_icon_url);
-						descrpanel.innerHTML = "DESCRIPTION: " + jsondata[i].description;
-						tagholder.innerHTML = "TAGS: " +  jsondata[i].tags.join(", ");
-						var seed=  createSeed(name);
+						var curr = jsondata[i];
+						nametag.innerHTML = "NAME: " +  curr.name;
+						embedimg2(curr.normal_icon_url,curr.shiny_icon_url);
+						descrpanel.innerHTML = "DESCRIPTION: " + curr.description;
+						tagholder.innerHTML = "TAGS: " +  curr.tags.join(", ");
+						var seed =  createSeed(curr.name);
 						seedpanel.innerHTML = "STAT SEED: " + seed;
 						var statprim = trirandomizer(seed);
 						statpanel. innerHTML = "STATS : (NORMAL | SHINY)";
@@ -99,10 +97,6 @@
 						hppanel.innerHTML = "HEALTH: " + hp + " | " + hp2;
 						atkpanel.innerHTML = "ATTACK: " + atk + " | " + atk2;
 						spdpanel.innerHTML = "SPEED: " + spd + " | " + spd2;
-            
-						break;
-					}
-				}
 			}
 			window.lookup = lookup;
 
@@ -118,11 +112,29 @@
 					// loading a url is asynchronous,
 					// so you can only play around with the loaded
 					// data after it has successfully loaded.
-					lookup("Puff Catty");
+					lookup(1);
         
+        			/*
+						TODO : 
+							{IMPORTANT!}
+							REMOVE JQUERY, 
+								- ATTEMPT TO REMOVE QUERY SELECTOR BREAKS NAV!???
+								- USING JQUERY FOR SMALL STUFF LIKE THIS IS HONESTLY INSANE
+									- JUST ADDS OVERHEAD/DEPENDENCIES AND A POTENTIAL POINT OF FALIURE/EXPLOIT
+									- USING DOCUMENT.GETELEMENTBYID() AND XHR WORKS JUST AS WELL
+									- BEHIND THE SCENES, THIS IS BASICALLY WHAT JQUERY OR ANY OTHER LIBRARY/FRAMEWORK DOES
+							FIX NAV ENTRY GENERATION, IS UGLY AND DIFFICULT TO MODIFY ATTRIBUTES
+							UPGRADE DESIGN, WHAT WAS I THINKING?!
+
+							{LOW PRIORITY!}
+							BETTER STATS + GENERATION
+							BATCH DOWNLOAD OPTION [EASY TO DO, IN THEORY]
+							PERHAPS CONVERT INTO ACTUAL API/LIBRARY, POSSIBLY INTEGRATED INTO MY GAME LIBRARY/ENGINE
+        			*/
 					$("#quicknav").html("");
-					for (var i in result.kongpanions) {
-						$("#quicknav").append("<br/><button onclick=\"window.lookup('" + result.kongpanions[i].name + "');\">" + "<img src='" + result.kongpanions[i].normal_icon_url_small + "'>"  + "</button>&nbsp;" +  result.kongpanions[i].name);
+					for (var i=0; i < jsondata.length; i++) {
+						var curr = jsondata[i];
+						$("#quicknav").append("<br/><button onclick=\"window.lookup(" + i + ");\">" + "<img src=\"" + curr.normal_icon_url_small + "\">"  + "</button>&nbsp;<br/>" +  curr.name);
 					}
 				}
 			});
